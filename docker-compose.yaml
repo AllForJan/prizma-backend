@@ -10,7 +10,8 @@ services:
     env_file: .env
     restart: 'no'
     volumes:
-      - './src:/app/app'
+      - './src:/app/app:cached'
+      - './data:/data:cached'
     ports:
       - '5000:5000'
 
