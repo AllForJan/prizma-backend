@@ -114,3 +114,5 @@ spark-warehouse
 .DS_Store
 metastore_db/
 notebooks
+
+/postgis

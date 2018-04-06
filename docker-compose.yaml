@@ -1,0 +1,29 @@
+---
+version: '2'
+
+services:
+
+  web:
+    build:
+      context: . 
+      dockerfile: webapp.Dockerfile
+    image: python:3.6.3
+    env_file: .env
+    restart: 'no'
+
+  redis:
+    image: redis
+    restart: 'no'
+
+  postgres:
+    image: kartoza/postgis:9.5-2.2
+    volumes:
+      - './postgis:/var/lib/postgresql:cached'
+    restart: 'no'
+    environment:
+      ALLOW_IP_RANGE: '0.0.0.0/0'
+      POSTGRES_USER: 'allfor'
+      POSTGRES_PASS: 'jan'
+      POSTGRES_DBNAME: 'gis'
+    ports:
+      - '5432:5432'
