@@ -7,9 +7,10 @@ services:
     build:
       context: . 
       dockerfile: webapp.Dockerfile
-    image: python:3.6.3
     env_file: .env
     restart: 'no'
+    ports:
+      - '5000:5000'
 
   redis:
     image: redis

@@ -5,17 +5,17 @@ RUN apt-get update && \
 		unzip \
 		less \
 		postgresql-client \
-		apt-get \
-		install \
 		binutils \
 		libproj-dev \
 		gdal-bin \
-		libgeos
+		libgeos-c1 \
+		libgeos-3.4.2
 
 RUN mkdir -p /app/app /app/packages
 WORKDIR /app/app
 
-COPY requirements.txt dev-requirements.txt /app/app/
-RUN pip install --src /app/packages --no-cache-dir -r dev-requirements.txt
+COPY requirements.txt requirements_dev.txt /app/app/
+RUN pip install --src /app/packages --no-cache-dir -r requirements_dev.txt
+EXPOSE 5000
 
-CMD ["bin/image-entrypoint.webapp.sh"]
+CMD ["start_app.sh"]
