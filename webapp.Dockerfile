@@ -14,8 +14,10 @@ RUN apt-get update && \
 RUN mkdir -p /app/app /app/packages
 WORKDIR /app/app
 
-COPY requirements.txt requirements_dev.txt /app/app/
+COPY requirements.txt requirements_dev.txt ./
 RUN pip install --src /app/packages --no-cache-dir -r requirements_dev.txt
 EXPOSE 5000
+COPY src .
 
-CMD ["start_app.sh"]
+RUN ls -la 
+CMD ["./start_app.sh"]

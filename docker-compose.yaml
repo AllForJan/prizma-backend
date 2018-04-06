@@ -9,6 +9,8 @@ services:
       dockerfile: webapp.Dockerfile
     env_file: .env
     restart: 'no'
+    volumes:
+      - './src:/app/app'
     ports:
       - '5000:5000'
 
