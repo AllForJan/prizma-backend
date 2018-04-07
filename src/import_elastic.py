@@ -15,9 +15,9 @@ STOP_WORDS = "data/stop.words.asciifold"
 
 
 def cleanhtml(raw_html):
-  cleanr = re.compile("<.*?>")
-  cleantext = re.sub(cleanr, "", raw_html)
-  return cleantext
+    cleanr = re.compile("<.*?>")
+    cleantext = re.sub(cleanr, "", raw_html)
+    return cleantext
 
 
 def get_data():
@@ -26,7 +26,7 @@ def get_data():
     df = pd.read_sql_table("apa_prijimatelia", engine)
 
     result_data = []
-    columns = ['meno', 'psc', 'obec']
+    columns = df.columns
     # df['created'] = df['created'].astype(int)
 
     for i, d in enumerate(df[columns].to_dict("records")):
@@ -55,23 +55,65 @@ def get_stop_words():
 def get_mappings():
     return {
         "settings":{
-            'number_of_shards': 1,
-
-        },
-            "mappings": {
-                TYPE_NAME: {
-                    "properties": {
-                        "meno":{
-                            "type": "text",
-                        },
-                        "psc": {
-                            "type": "integer"
-                        },
-                        "obec":{
-                            "type":"text"
-                        }
+            "analysis": {
+                "index_analyzer": {
+                    "my_index_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "mynGram"
+                        ]
+                    }
+                },
+                "analyzer": {
+                    "my_search_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "standard",
+                            "lowercase",
+                            "mynGram"
+                        ]
+                    }
+                },
+                "filter": {
+                    "mynGram": {
+                        "type": "nGram",
+                        "min_gram": 2,
+                        "max_gram": 50
                     }
                 }
+            },
+        },
+        "mappings": {
+            TYPE_NAME: {
+                "properties": {
+                    "meno": {
+                        "type": "text",
+                        "analyzer": "my_search_analyzer"
+                    },
+                    "psc": {
+                        "type": "integer"
+                    },
+                    "obec": {
+                        "type": "text",
+                        "analyzer": "my_search_analyzer"
+                    },
+                    "opatreni_kod": {
+                        "type": "keyword"
+                    },
+                    "opatrenie": {
+                        "type": "text"
+                    },
+                    "suma": {
+                        "type": "float",
+                    },
+                    "rok": {
+                        "type": "integer"
+                    }
+                }
+            }
         }
     }
 
@@ -88,7 +130,7 @@ def refresh_all(es):
     mappings = get_mappings()
     res = es.indices.create(index=INDEX_NAME, body=mappings)
 
-    print("Inserting all data - {len}".format(len=len(data)/2))
+    print("Inserting all data - {len}".format(len=len(data) / 2))
 
     # data are doubled, because there is dict about index and type for every row in data
     # so we perform bulk for 20000k - 10000k items
@@ -102,18 +144,18 @@ def refresh_all(es):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--all",
-                       default=False,
-                       action="store_true",
-                       help="Delete index, recreate mapping in elasticsearch and load data there."
-                       )
+                        default=False,
+                        action="store_true",
+                        help="Delete index, recreate mapping in elasticsearch and load data there."
+                        )
     parser.add_argument("--limit",
-                       type=int,
-                       help="Limit for data"
-                       )
+                        type=int,
+                        help="Limit for data"
+                        )
     args = parser.parse_args()
-    es = Elasticsearch(['elasticsearch',],
-        timeout=30, max_retries=10, retry_on_timeout=True, port=9200
-    )
+    es = Elasticsearch(['elasticsearch', ],
+                       timeout=30, max_retries=10, retry_on_timeout=True, port=9200
+                       )
 
     if args.limit:
         LIMIT = args.limit

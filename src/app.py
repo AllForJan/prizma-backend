@@ -74,7 +74,8 @@ class AutoComplete(Resource):
 
         rows = [{
                 'data': r['_source'], '_id': r['_id']
-                 } for r in results['hits']['hits']]
+        } for r in results['hits']['hits']]
+
         return jsonify(
             rows
         )
