@@ -6,6 +6,7 @@ from flask_restful import Resource, Api
 import psycopg2
 import psycopg2.extras
 import settings
+from utils import load_sql
 
 app = Flask(__name__)
 api = Api(app)
@@ -23,8 +24,8 @@ class ListPO(Resource):
         q = request.args.get('q', 'Brezolupy')
 
         cur = conn.cursor()
-
-        cur.execute("select * from apa_prijimatelia where obec='{q}'".format(q=q))
+        sql = load_sql('example.sql', kwargs={'q': q})
+        cur.execute(sql)
         rows = [row for row in cur]
         cur.close()
 
