@@ -2,13 +2,14 @@ from elasticsearch import Elasticsearch
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
-from db.manager import conn
+from db.manager import get_conn
 from utils import load_sql
 from views.list import ListPO
 
 app = Flask(__name__)
 api = Api(app)
 cors = CORS(app)
+conn = get_conn()
 
 
 @app.route('/')

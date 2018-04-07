@@ -1,8 +1,11 @@
 from flask import request, jsonify
 from flask_restful import Resource
 
-from db.manager import conn
+from db.manager import get_conn
 from utils import load_sql
+
+
+conn = get_conn()
 
 
 class ListPO(Resource):
