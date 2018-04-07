@@ -39,6 +39,10 @@ class AutoComplete(Resource):
         q = request.args.get('q', 'Brezolupy')
         typ = request.args.get('typ', 'meno')
 
+        if typ == 'meno':
+            typ += '_autocomplete'
+        print(typ)
+
         es = Elasticsearch(['elasticsearch', ],
                            timeout=30, max_retries=10, retry_on_timeout=True, port=9200
                            )

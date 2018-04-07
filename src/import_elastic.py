@@ -90,6 +90,10 @@ def get_mappings():
             TYPE_NAME: {
                 "properties": {
                     "meno": {
+                      "type":"text",
+                      "copy_to": "meno_autocomplete"
+                    },
+                    "meno_autocomplete": {
                         "type": "text",
                         "analyzer": "my_search_analyzer"
                     },
