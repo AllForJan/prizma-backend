@@ -5,6 +5,7 @@ from flask_restful import Resource, Api
 from db.manager import get_conn
 from utils import load_sql
 from views.list import ListPO
+from views.detail import DetailPO
 
 app = Flask(__name__)
 api = Api(app)
@@ -68,6 +69,7 @@ class AutoComplete(Resource):
 api.add_resource(AutoComplete, '/autocomplete')
 api.add_resource(ListPO, '/po/list')
 api.add_resource(GroupPO, '/po/group')
+api.add_resource(DetailPO, '/po/<int:custom_id>')
 
 if __name__ == '__main__':
     app.run()

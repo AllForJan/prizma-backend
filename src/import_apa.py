@@ -3,7 +3,7 @@ import sqlalchemy
 
 import settings
 
-df = pd.read_csv(settings.APA_FILE_PATH, sep=';', engine='python')
+df = pd.read_csv(settings.APA_WITH_CUSTOM_IDS, sep=';', engine='python')
 
 df = df.rename(columns={
     'URL': 'url',
@@ -13,7 +13,8 @@ df = df.rename(columns={
     'Opatrenie - Kod': 'opatrenie_kod',
     'Opatrenie': 'opatrenie',
     'Suma': 'suma',
-    'Rok': 'rok'
+    'Rok': 'rok',
+    'custom_id': 'custom_id'
 })
 types_dict = {
     'URL': sqlalchemy.types.TEXT,
@@ -23,7 +24,8 @@ types_dict = {
     'Opatrenie - Kod': sqlalchemy.types.TEXT,
     'Opatrenie': sqlalchemy.types.TEXT,
     'Suma': sqlalchemy.types.FLOAT,
-    'Rok': sqlalchemy.types.INT
+    'Rok': sqlalchemy.types.INT,
+    'custom_id': sqlalchemy.types.INT,
 }
 
 conn = sqlalchemy.create_engine(settings.DATABASE_URL)
