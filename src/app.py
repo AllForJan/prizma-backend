@@ -1,6 +1,7 @@
 import json
 import itertools
 
+from elasticsearch import Elasticsearch
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
@@ -52,6 +53,34 @@ class GroupPO(Resource):
         )
 
 
+class AutoComplete(Resource):
+
+    def get(self):
+        q = request.args.get('q', 'Brezolupy')
+        typ = request.args.get('typ', 'meno')
+
+        es = Elasticsearch(['elasticsearch', ],
+                           timeout=30, max_retries=10, retry_on_timeout=True, port=9200
+                           )
+
+        query = {
+            "query": {
+                "match": {
+                        typ: q
+                    }
+                }
+            }
+        results = es.search(index='apa', doc_type='po', body=query)
+
+        rows = [{
+                'data': r['_source'], '_id': r['_id']
+                 } for r in results['hits']['hits']]
+        return jsonify(
+            rows
+        )
+
+
+api.add_resource(AutoComplete, '/autocomplete')
 api.add_resource(ListPO, '/po/list')
 api.add_resource(GroupPO, '/po/group')
 
