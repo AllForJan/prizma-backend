@@ -116,3 +116,4 @@ metastore_db/
 notebooks
 
 /postgis
+/.vagrant
