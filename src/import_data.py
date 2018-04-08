@@ -31,6 +31,8 @@ def fix_repeated_names(threshold, s, log_fixes=None):
     :rtype: str
     """
     # ICO short-circuit
+    if isinstance(s, float):
+        return str(s)
     if s.isdigit():
         return s
     len_s = len(s)
@@ -54,18 +56,19 @@ def get_apa_prijimatelia(csv_file_path):
         csv_file_path,
         sep=';',
         engine='python',
-        dtype={
-            'URL': str,
-            'Meno': str,
-            'PSC': str,
-            'Obec': str,
-            'Opatrenie': str,
-            'Opatrenie - Kod': str,
-            'Suma': float,
-            'Rok': int,
-        }
+        # dtype={
+        #     'URL': str,
+        #     'Meno': str,
+        #     'PSC': str,
+        #     'Obec': str,
+        #     'Opatrenie': str,
+        #     'Opatrenie - Kod': str,
+        #     'Suma': float,
+        #     'Rok': int,
+        # }
     )
     df['PSC'] = df['PSC'].apply(lambda x: x.replace(' ', ''))
+    df['Meno'] = df['Meno'].apply(functools.partial(fix_repeated_names, 4, log_fixes=global_log_fixes))
 
     df = df.rename(columns={
         'URL': 'url',
@@ -101,13 +104,15 @@ def get_apa_ziadosti_o_priame_podpory_diely(csv_file_path):
             'URL': str,
             'Ziadatel': str,
             'ICO': str,
-            'Rok': int,
+            # 'Rok': int,
             'Lokalita': str,
             'Diel': str,
             'Kultura': str,
             'Vymera': str,
         }
     )
+
+    df['Ziadatel'] = df['Ziadatel'].apply(functools.partial(fix_repeated_names, 4, log_fixes=global_log_fixes))
     df = df.rename(columns={
         'URL': 'url',
         'Ziadatel': 'meno',
@@ -119,7 +124,7 @@ def get_apa_ziadosti_o_priame_podpory_diely(csv_file_path):
         'custom_id': 'custom_id',
         'ICO': 'ico'
     })
-    df['vymera'] = df['vymera'].apply(lambda x: float(x[:-3]) if x.endswith(' ha') else x)
+    df['vymera'] = df['vymera'].apply(lambda x: float(x[:-3]) if not isinstance(x, float) and x.endswith(' ha') else x)
     types_dict = {
         'url': sqlalchemy.types.TEXT,
         'meno': sqlalchemy.types.TEXT,
@@ -140,24 +145,25 @@ def get_apa_ziadosti_o_projektove_podpory(csv_file_path):
         sep=';',
         engine='python',
         decimal=',',
-        dtype={
-          'Ziadatel': str,
-          'ICO': str,
-          'Kod projektu': str,
-          'Nazov projektu': str,
-          'VUC': str,
-          'Cislo vyzvy': str,
-          'Kod podopatrenia': str,
-          'Status': str,
-          'Datum RoN/datum zastavenia konania': str,
-          'Dovod RoN/zastavenie konania': str,
-          'Datum ucinnosti zmluvy': str,
-          'Schvaleny NFP celkom': float,
-          'Vyplateny NFP celkom': float,
-          'Pocet bodov': int,
-        }
+        # dtype={
+        #   'Ziadatel': str,
+        #   'ICO': str,
+        #   'Kod projektu': str,
+        #   'Nazov projektu': str,
+        #   'VUC': str,
+        #   'Cislo vyzvy': str,
+        #   'Kod podopatrenia': str,
+        #   'Status': str,
+        #   'Datum RoN/datum zastavenia konania': str,
+        #   'Dovod RoN/zastavenie konania': str,
+        #   'Datum ucinnosti zmluvy': str,
+        #   'Schvaleny NFP celkom': float,
+        #   'Vyplateny NFP celkom': float,
+        #   'Pocet bodov': int,
+        # }
     )
 
+    df['Ziadatel'] = df['Ziadatel'].apply(functools.partial(fix_repeated_names, 4, log_fixes=global_log_fixes))
     df = df.rename(columns={
         'Ziadatel': 'meno',
         'ICO': 'ico',
@@ -208,13 +214,13 @@ def get_apa_ziadosti_o_priame_podpory(csv_file_path):
         sep=';',
         engine='python',
         decimal=',',
-        dtype={
-            'URL': str,
-            'Ziadatel': str,
-            'ICO': str,
-            'Rok': int,
-            'Ziadosti': str,
-        }
+        # dtype={
+        #     'URL': str,
+        #     'Ziadatel': str,
+        #     'ICO': str,
+        #     'Rok': int,
+        #     'Ziadosti': str,
+        # }
     )
 
     df['Ziadatel'] = df['Ziadatel'].apply(functools.partial(fix_repeated_names, 4, log_fixes=global_log_fixes))
@@ -278,6 +284,7 @@ def import_csvs():
         print('Parsing data for {} from "{}"'.format(table_name, csv_path))
         try:
             df, types_dict = get_fun(csv_path)
+            df = df.sort_values('meno', ascending=False)[:10000]
 
             def gen_id(x):
                 global curr_id
@@ -285,12 +292,19 @@ def import_csvs():
                 new_id = from_map if from_map else get_next_id()
                 ids_map[x] = new_id
                 return new_id
+
+            try:
+                df = df.drop('custom_id')
+            except:
+                pass
+
             df['custom_id'] = df['meno'].apply(gen_id)
 
         except Exception as e:
             print('ERROR: "{}" while parsing {}'.format(e, csv_path))
             continue
-        print('Importing table to DB'.format(table_name))
+
+        print('Importing table to DB. {sh}'.format(sh=df.shape))
         try:
             df.to_sql(table_name, con=db_conn, index=False, dtype=types_dict, if_exists='replace')
         except Exception as e:
