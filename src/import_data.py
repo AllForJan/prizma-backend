@@ -285,4 +285,4 @@ if __name__ == '__main__':
     import_csvs()
     print("\nfixes:")
     from pprint import pprint
-    pprint(log_fixes)
+    pprint(global_log_fixes)
