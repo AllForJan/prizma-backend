@@ -115,6 +115,9 @@ def get_mappings():
                     },
                     "rok": {
                         "type": "integer"
+                    },
+                    "custom_id":{
+                        "type":"integer"
                     }
                 }
             }
@@ -157,8 +160,8 @@ if __name__ == "__main__":
                         help="Limit for data"
                         )
     args = parser.parse_args()
-    es = Elasticsearch(['elasticsearch', ],
-                       timeout=30, max_retries=10, retry_on_timeout=True, port=9200
+    es = Elasticsearch([settings.ELASTIC_HOST, ],
+                       timeout=30, max_retries=10, retry_on_timeout=True, port=settings.ELASTIC_PORT
                        )
 
     if args.limit:

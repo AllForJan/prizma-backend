@@ -3,6 +3,7 @@ from flask import request, jsonify
 from flask_restful import Resource
 
 from db.manager import get_conn
+import settings
 
 conn = get_conn()
 
@@ -29,8 +30,8 @@ class ListPO(Resource):
         q = request.args.get('q', None)
 
         es = Elasticsearch(
-            ['elasticsearch', ],
-            timeout=30, max_retries=10, retry_on_timeout=True, port=9200
+            [settings.ELASTIC_HOST, ],
+            timeout=30, max_retries=10, retry_on_timeout=True, port=settings.ELASTIC_PORT
         )
 
         if not q:
