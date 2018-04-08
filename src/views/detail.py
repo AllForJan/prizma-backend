@@ -47,6 +47,16 @@ class DetailPO(Resource):
             ziadosti_stats['roky'].append(row['rok'])
             ziadosti_stats['pocet'].append(row['pocet'])
 
+        obec = prijimatel_ziadosti[0]['lokalita'] if len(prijimatel_ziadosti) > 0 else ''
+        # sql = load_sql('average_per_obec.sql', kwargs={'obec': 'a'})
+        # cur.execute(sql)
+        # average_obec = [row for row in cur]
+
+        # sql = load_sql('average_per_custom_id_and_obec.sql', kwargs={'obec': 'a',
+        #                                                              'custom_id': custom_id})
+        # cur.execute(sql)
+        # average_obec_custom_id = [row for row in cur]
+
         cur.close()
 
         return jsonify(
@@ -55,5 +65,8 @@ class DetailPO(Resource):
             prijimatel_ziadosti=prijimatel_ziadosti,
             prijimatel_roky=prijimatel_roky,
             url_diely=url_diely,
-            ziadosti_stats=ziadosti_stats
+            ziadosti_stats=ziadosti_stats,
+            # average_obec=average_obec,
+            # average_prijimal=average_obec_custom_id
         )
+
