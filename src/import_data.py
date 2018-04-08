@@ -10,10 +10,10 @@ import settings
 import import_elastic
 
 
-log_fixes = []
+global_log_fixes = []
 
 
-def fix_repeated_names(threshold, s): #, log_fixes=None):
+def fix_repeated_names(threshold, s, log_fixes=None):
     """
     Function will trim longest suffix holding property, that it is prefix too:
 
@@ -214,7 +214,7 @@ def get_apa_ziadosti_o_priame_podpory(csv_file_path):
         }
     )
 
-    df['Ziadatel'] = df['Ziadatel'].apply(functools.partial(fix_repeated_names, 4))
+    df['Ziadatel'] = df['Ziadatel'].apply(functools.partial(fix_repeated_names, 4, log_fixes=global_log_fixes))
 
     df = df.rename(columns={
         'URL': 'url',
@@ -241,21 +241,22 @@ def import_csvs():
         (
             get_apa_prijimatelia,
             settings.APA_PRIJIMATELIA,
-            'apa_prijimatelia'),
+            'apa_prijimatelia',
+        ),
         (
             get_apa_ziadosti_o_priame_podpory_diely,
             settings.APA_ZIADOSTI_O_PRIAME_PODPORY_DIELY,
-            'apa_ziadosti_diely'
+            'apa_ziadosti_diely',
         ),
         (
             get_apa_ziadosti_o_projektove_podpory,
             settings.APA_ZIADOSTI_O_PROJEKTOVE_PODPORY,
-            'apa_ziadosti_o_projektove_podpory'
+            'apa_ziadosti_o_projektove_podpory',
         ),
         (
             get_apa_ziadosti_o_priame_podpory,
             settings.APA_ZIADOSTI_O_PRIAME_PODPORY,
-            'apa_ziadosti_o_priame_podpory'
+            'apa_ziadosti_o_priame_podpory',
         ),
     ]:
         print('Parsing data for {} from "{}"'.format(table_name, csv_path))
