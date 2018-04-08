@@ -28,5 +28,8 @@ types_dict = {
     'custom_id': sqlalchemy.types.INT,
 }
 
+df['psc'] = df['psc'].apply(lambda x: str(x).replace(' ', ''))
+
+
 conn = sqlalchemy.create_engine(settings.DATABASE_URL)
 df.to_sql('apa_prijimatelia', con=conn, index=False, dtype=types_dict, if_exists='replace')
