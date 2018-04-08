@@ -76,7 +76,7 @@ def get_apa_prijimatelia(csv_file_path):
         'Opatrenie': 'opatrenie',
         'Suma': 'suma',
         'Rok': 'rok',
-        # 'custom_id': 'custom_id'
+        'custom_id': 'custom_id'
     })
     types_dict = {
         'url': sqlalchemy.types.TEXT,
@@ -87,7 +87,7 @@ def get_apa_prijimatelia(csv_file_path):
         'opatrenie_kod': sqlalchemy.types.TEXT,
         'suma': sqlalchemy.types.FLOAT,
         'rok': sqlalchemy.types.INT,
-        # 'custom_id': sqlalchemy.types.INT,
+        'custom_id': sqlalchemy.types.INT,
     }
     return df, types_dict
 
@@ -116,7 +116,7 @@ def get_apa_ziadosti_o_priame_podpory_diely(csv_file_path):
         'Kultura': 'kultura',
         'Lokalita': 'lokalita',
         'Rok': 'rok',
-        # 'custom_id': 'custom_id',
+        'custom_id': 'custom_id',
         'ICO': 'ico'
     })
     df['vymera'] = df['vymera'].apply(lambda x: float(x[:-3]) if x.endswith(' ha') else x)
@@ -129,6 +129,7 @@ def get_apa_ziadosti_o_priame_podpory_diely(csv_file_path):
         'diel': sqlalchemy.types.TEXT,
         'kultura': sqlalchemy.types.TEXT,
         'vymera': sqlalchemy.types.FLOAT,
+        'custom_id': sqlalchemy.types.INT,
     }
     return df, types_dict
 
@@ -172,6 +173,7 @@ def get_apa_ziadosti_o_projektove_podpory(csv_file_path):
         'Schvaleny NFP celkom': 'schvaleny_nfp_celkom',
         'Vyplateny NFP celkom': 'vyplateny_nfp_celkom',
         'Pocet bodov': 'pocet_bodov',
+        'custom_id': 'custom_id',
     })
 
     for col_name in ['datum_ron_zastavenia_konania', 'datum_ucinnosti_zmluvy']:
@@ -194,6 +196,7 @@ def get_apa_ziadosti_o_projektove_podpory(csv_file_path):
         'schvaleny_nfp_celkom': sqlalchemy.types.FLOAT,
         'vyplateny_nfp_celkom': sqlalchemy.types.FLOAT,
         'pocet_bodov': sqlalchemy.types.INT,
+        'custom_id': sqlalchemy.types.INT,
     }
 
     return df, types_dict
@@ -222,7 +225,7 @@ def get_apa_ziadosti_o_priame_podpory(csv_file_path):
         'ICO': 'ico',
         'Rok': 'rok',
         'Ziadosti': 'ziadosti',
-        # 'custom_id': 'custom_id',
+        'custom_id': 'custom_id',
     })
 
     types_dict = {
@@ -231,12 +234,25 @@ def get_apa_ziadosti_o_priame_podpory(csv_file_path):
         'ico': sqlalchemy.types.TEXT,
         'rok': sqlalchemy.types.INT,
         'ziadosti': sqlalchemy.types.TEXT,
+        'custom_id': sqlalchemy.types.INT,
     }
     return df, types_dict
 
 
+curr_id = 0
+
+
+def get_next_id():
+    global curr_id
+    curr_id += 1
+    return curr_id
+
+
 def import_csvs():
     db_conn = sqlalchemy.create_engine(settings.DATABASE_URL)
+
+    ids_map = {}
+
     for get_fun, csv_path, table_name in [
         (
             get_apa_prijimatelia,
@@ -262,6 +278,15 @@ def import_csvs():
         print('Parsing data for {} from "{}"'.format(table_name, csv_path))
         try:
             df, types_dict = get_fun(csv_path)
+
+            def gen_id(x):
+                global curr_id
+                from_map = ids_map.get(x, None)
+                new_id = from_map if from_map else get_next_id()
+                ids_map[x] = new_id
+                return new_id
+            df['custom_id'] = df['meno'].apply(gen_id)
+
         except Exception as e:
             print('ERROR: "{}" while parsing {}'.format(e, csv_path))
             continue
@@ -274,10 +299,10 @@ def import_csvs():
         print('Table {} imported'.format(table_name))
 
     print("Importing to elasticsearch ....")
-    es = Elasticsearch([settings.ELASTIC_HOST, ],
-                       timeout=30, max_retries=10, retry_on_timeout=True, port=settings.ELASTIC_PORT
-                       )
-    import_elastic.refresh_all(es)
+    # es = Elasticsearch([settings.ELASTIC_HOST, ],
+    #                    timeout=30, max_retries=10, retry_on_timeout=True, port=settings.ELASTIC_PORT
+    #                    )
+    # import_elastic.refresh_all(es)
     print("Imported  OK")
 
 

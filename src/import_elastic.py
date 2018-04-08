@@ -115,6 +115,9 @@ def get_mappings():
                     },
                     "rok": {
                         "type": "integer"
+                    },
+                    "custom_id":{
+                        "type":"integer"
                     }
                 }
             }

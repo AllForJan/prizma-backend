@@ -31,11 +31,11 @@ def get_dict(path_file_1):
 
 def csv_append():
     path1 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_diely_2018-03-20.csv'
-    path2 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_diely_2018-03-20_with_custom_ids.csv'
+    path2 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_diely_2018-03-20.csv'
     path3 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_2018-03-20.csv'
-    path4 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_2018-03-20_with_custom_ids.csv'
+    path4 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_2018-03-20.csv'
     path5 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_prijimatelia_2018-03-15.csv'
-    path6 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_prijimatelia_2018-03-15_with_custom_ids.csv'
+    path6 = '/Users/koli/projects/HACKATHON/prizma-backend/data/apa_prijimatelia_2018-03-15.csv'
 
     custom_ids = get_dict('/Users/koli/projects/HACKATHON/prizma-backend/data/apa_ziadosti_o_priame_podpory_2018-03-20.csv')
 
